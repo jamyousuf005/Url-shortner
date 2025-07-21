@@ -6,7 +6,7 @@ const { connectToMongoDb } = require("./connection");
 const cors = require('cors');
 
 const app = express()
-const PORT = 8001;
+const PORT = process.env.PORT;
 const URL = require("./models/url")
 
 app.use(express.json())
@@ -23,6 +23,10 @@ app.use("/url", urlRoute)
 app.get("/delete", async (req,res)=>{
      await URL.deleteMany({}) 
      res.json(console.log("history deleted"))
+})
+
+app.get("/", (req,res)=>{
+    return res.json({msg:"nothing"})
 })
 
 app.get("/test", async(req,res)=>{
