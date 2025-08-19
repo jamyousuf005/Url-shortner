@@ -22,7 +22,7 @@ app.use("/url", urlRoute)
 
 app.get("/delete", async (req,res)=>{
      await URL.deleteMany({}) 
-     res.json(console.log("history deleted"))
+     res.json({msg:"history deleted"})
 })
 
 app.get("/", (req,res)=>{
