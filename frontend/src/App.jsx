@@ -52,10 +52,29 @@ const App = () => {
     }
   };
 
+
+
   const handleDelete = async () => {
-    await fetch(`${backEndUrl}/delete`);
-    setToggleComp(prev => !prev);
-  };
+    if(shortUrl){
+  try {
+    await fetch(`${backEndUrl}/delete`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json"
+      },
+    });
+
+    localStorage.removeItem("shortUrl");
+    setShortUrl("");
+    setToggleComp(false); 
+
+  } catch (err) {
+    console.error("Error deleting history:", err);
+  }
+ }else{
+       return
+   } 
+};
 
   return (
     <>
@@ -88,7 +107,7 @@ const App = () => {
           </form>
 
           {shortUrl && (
-            <div className="mt-6 bg-green-900 text-green-300 px-4 py-3 rounded-xl">
+            <div className="mt-6 flex flex-wrap bg-green-900 text-green-300 px-2 md:px-4 py-3 rounded-xl">
               <p>
                 Short URL:{" "}
                 <a

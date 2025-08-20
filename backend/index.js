@@ -20,7 +20,7 @@ connectToMongoDb(process.env.MONGODB_URL)
 
 app.use("/url", urlRoute)
 
-app.get("/delete", async (req,res)=>{
+app.delete("/delete", async (req,res)=>{
      await URL.deleteMany({}) 
      res.json({msg:"history deleted"})
 })
