@@ -1,152 +1,87 @@
-import React, { useState,useEffect } from 'react';
-import Navbar from './components/Navbar';
-import AllUrls from './components/AllUrls';
+import React, { useState, useEffect } from 'react'
+import Login from './components/Login'
+import Signup from './components/Signup'
+import UrlApp from './UrlApp'
+import AdminApp from './AdminApp'
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from 'react-hot-toast';
 
 const App = () => {
-  const backEndUrl = import.meta.env.VITE_BACKEND_URL 
+  const backEndUrl = import.meta.env.VITE_BACKEND_URL;
+
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [role, setRole] = useState(null);
+  const [loading, setLoading] = useState(true); 
+
   
-  const [inputUrl, setInputUrl] = useState("");
-  const [shortUrl, setShortUrl] = useState("");
-  const [toggleComp, setToggleComp] = useState(false);
 
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const response = await fetch(`${backEndUrl}/checkAuth`, {
+          credentials: 'include'
+        });
 
-    useEffect(() => {
-    const storedUrl = localStorage.getItem("shortUrl");
-    if (storedUrl) {
-      setShortUrl(storedUrl);
-    }
+        const data = await response.json();
+
+        if (response.ok && data.isAuthenticated) {
+          setIsAuthenticated(true);
+          setRole(data.role);
+        } else {
+          setIsAuthenticated(false);
+          setRole(null);
+        }
+      } catch (error) {
+        setIsAuthenticated(false);
+        setRole(null);
+      } finally {
+        setLoading(false); 
+      }
+    };
+
+    checkAuthStatus();
   }, []);
 
-  const handleToggle = () => {
-    setToggleComp(prev => !prev);
+  const PrivateRoute = ({ children }) => {
+    if (loading) return <div>Loading...</div>; 
+    if (!isAuthenticated){
+       return <Navigate to="/" replace />;
+    }
+    return children;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const urlRegex = /^(https?:\/\/)[^\s/$.?#].[^\s]*$/i;
-
-    if (!inputUrl.trim() || !urlRegex.test(inputUrl)) {
-      alert("Please enter a valid URL before generating.");
-      return;
+  
+  const PublicRoute = ({ children }) => {
+    if (loading) return <div>Loading...</div>
+    if (isAuthenticated) {
+      return role === "ADMIN" ? <Navigate to="/admin" replace /> : <Navigate to="/urlapp" replace />;
     }
-
-    try {
-      const res = await fetch(`${backEndUrl}/url`, {
-        method: "POST",
-          headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ url: inputUrl })
-      });
-
-      const data = await res.json();
-       const newShortUrl=`${backEndUrl}/url/${data.id}`
-      setShortUrl(newShortUrl);
-      localStorage.setItem("shortUrl", newShortUrl); 
-
-
-      setInputUrl("");
-
-    } catch (err) {
-      console.log("Error submitting URL", err);
-    }
+    return children;
   };
-
-
-
-  const handleDelete = async () => {
-    if(shortUrl){
-  try {
-    await fetch(`${backEndUrl}/delete`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json"
-      },
-    });
-
-    localStorage.removeItem("shortUrl");
-    setShortUrl("");
-    setToggleComp(false); 
-
-  } catch (err) {
-    console.error("Error deleting history:", err);
-  }
- }else{
-       return
-   } 
-};
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
-        <Navbar />
+      <Router>
+        <Routes>
+          <Route path="/" element={<PublicRoute><Login setIsAuthenticated={setIsAuthenticated} role={role} /></PublicRoute>} />
+          <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
 
-        <div className="max-w-3xl mx-auto py-12 px-6">
+          <Route path="/urlapp" element={
+            <PrivateRoute>
+              <UrlApp setIsAuthenticated={setIsAuthenticated} role={role} />
+            </PrivateRoute>
+          } />
 
-          <form
-            onSubmit={handleSubmit}
-            className="bg-gray-800 rounded-2xl shadow-xl p-6 flex flex-col gap-4"
-          >
-            <label htmlFor="url" className="text-sm font-medium">
-              Enter your original URL
-            </label>
-            <input
-              id="url"
-              type="text"
-              value={inputUrl}
-              onChange={(e) => setInputUrl(e.target.value)}
-              placeholder="https://example.com"
-              className="p-3 rounded-xl bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 transition-all py-2 px-4 rounded-xl font-semibold"
-            >
-              Generate
-            </button>
-          </form>
-
-          {shortUrl && (
-            <div className="mt-6 flex flex-wrap bg-green-900 text-green-300 px-2 md:px-4 py-3 rounded-xl">
-              <p>
-                Short URL:{" "}
-                <a
-                  href={shortUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="underline hover:text-green-400 transition"
-                >
-                  {shortUrl}
-                </a>
-              </p>
-            </div>
-          )}
-
-          <div className="mt-8 flex flex-wrap gap-4 justify-center">
-            <button
-              onClick={handleToggle}
-              className="bg-purple-600 hover:bg-purple-700 transition-all py-2 px-5 rounded-xl font-medium"
-            >
-              View History
-            </button>
-
-            <button
-              onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700 transition-all py-2 px-5 rounded-xl font-medium"
-            >
-              Delete History
-            </button>
-          </div>
-
-          {toggleComp && (
-            <div className="mt-10">
-              <AllUrls />
-            </div>
-          )}
-        </div>
-      </div>
+          <Route path="/admin" element={
+            <PrivateRoute>
+              {role === "ADMIN" ? <AdminApp setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/" replace />}
+            </PrivateRoute>
+          } />
+        </Routes>
+        <Toaster position="top-center" reverseOrder={false} />
+      </Router>
     </>
   );
-};
+}
 
 export default App;

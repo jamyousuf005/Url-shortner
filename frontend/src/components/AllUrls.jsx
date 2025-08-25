@@ -11,10 +11,10 @@ const AllUrls = () => {
 
 
     const fetchUrls = async () => {
-
-
       try {
-        const res = await fetch(`${backEndUrl}/test`);
+        const res = await fetch(`${backEndUrl}/test`,{
+          credentials:'include'
+        });
         const data = await res.json();
         if (isMounted) {
           setAllUrls(data);
@@ -38,11 +38,7 @@ const AllUrls = () => {
 
 
 
-  // useEffect(() => {
-  //   fetch("http://localhost:8001/test")
-  //     .then(res => res.json())
-  //     .then(data => setAllUrls(data));
-  // }, []);
+
 
   return (
     <div className="mt-10">
