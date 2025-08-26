@@ -48,8 +48,8 @@ app.get('/checkAuth', async (req, res) => {
         console.error('Token verification failed:', error.message);
         res.clearCookie('token', {
         httpOnly: true,
-        sameSite: 'lax',
-        secure: false
+        sameSite: 'none',
+        secure: true
     })
         res.status(401).json({ isAuthenticated: false, message: 'Unauthorized: Invalid token' });
     }

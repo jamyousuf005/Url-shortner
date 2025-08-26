@@ -52,8 +52,8 @@ async function hanldeUserLogin(req, res) {
 
         res.cookie('token', token, {
             httpOnly: true,
-            sameSite: 'lax',
-            secure: false
+            sameSite: 'none',
+            secure: true
         })
 
         return res.json({ msg: 'User logged in', token , role:user.role});
@@ -66,8 +66,8 @@ async function hanldeUserLogin(req, res) {
 async function handleUserLogout(req, res) {
     res.clearCookie('token', {
         httpOnly: true,
-        sameSite: 'lax',
-        secure: false
+        sameSite: 'none',
+        secure: true
     });
     return res.json({ msg: 'User logged out' });
 }
