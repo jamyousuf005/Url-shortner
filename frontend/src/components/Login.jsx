@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 
 
-const Login = ({setIsAuthenticated}) => {
+const Login = ({ setIsAuthenticated, setRole }) => {
 
   const backEndUrl = import.meta.env.VITE_BACKEND_URL
 
@@ -49,11 +49,15 @@ const Login = ({setIsAuthenticated}) => {
       }
       toast.success("User Logged in Successfully")
       const data = await res.json()
-      
+
       setIsAuthenticated(true)
 
+      if (data.role === "ADMIN") {
+
+        setRole("ADMIN")
+      }
       navigate('/urlapp')
-       
+
 
     } catch (err) {
       toast('Error Logging In')

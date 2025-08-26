@@ -27,6 +27,7 @@ const App = () => {
         if (response.ok && data.isAuthenticated) {
           setIsAuthenticated(true);
           setRole(data.role);
+          console.log(data)
         } else {
           setIsAuthenticated(false);
           setRole(null);
@@ -53,9 +54,7 @@ const App = () => {
   
   const PublicRoute = ({ children }) => {
     if (loading) return <div>Loading...</div>
-    if (isAuthenticated) {
-      return role === "ADMIN" ? <Navigate to="/admin" replace /> : <Navigate to="/urlapp" replace />;
-    }
+      
     return children;
   };
 
@@ -63,7 +62,7 @@ const App = () => {
     <>
       <Router>
         <Routes>
-          <Route path="/" element={<PublicRoute><Login setIsAuthenticated={setIsAuthenticated} role={role} /></PublicRoute>} />
+          <Route path="/" element={<PublicRoute><Login setIsAuthenticated={setIsAuthenticated} role={role} setRole={setRole} /></PublicRoute>} />
           <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
 
           <Route path="/urlapp" element={
