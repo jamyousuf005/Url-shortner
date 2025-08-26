@@ -20,22 +20,21 @@ async function hanldeUserLogin(req, res) {
         return res.status(404).json({ msg: 'user not found' })
     }
    const token= setUser(user)
-   res.cookie("token", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production", // true for Vercel
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
-});
-
+    res.cookie('token', token, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: false
+    })
 
     return res.json({ msg: 'user loggedIn', token })
 }
 
 async function handleUserLogout(req, res) {
-   res.clearCookie("token", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
-});
+    res.clearCookie('token', {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: false
+    });
     return res.json({ msg: 'user logged out' });
 }
 

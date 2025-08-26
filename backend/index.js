@@ -62,11 +62,11 @@ app.get('/checkAuth', async (req, res) => {
         res.status(200).json({ isAuthenticated: true, userId: decoded.userId, role: decoded.role, email: decoded.email });
     } catch (error) {
         console.error('Token verification failed:', error.message);
-        res.clearCookie("token", {
+        res.clearCookie('uid', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
-        });
+            sameSite: 'lax',
+            secure: false
+        })
         res.status(401).json({ isAuthenticated: false, message: 'Unauthorized: Invalid token' });
     }
 
