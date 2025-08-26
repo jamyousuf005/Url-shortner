@@ -56,8 +56,7 @@ const Login = ({ setIsAuthenticated, setRole }) => {
 
         setRole("ADMIN")
       }
-      navigate('/urlapp')
-
+     window.location.href = '/urlapp'
 
     } catch (err) {
       toast('Error Logging In')
