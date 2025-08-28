@@ -49,7 +49,8 @@ app.get('/checkAuth', async (req, res) => {
         res.clearCookie('token', {
         httpOnly: true,
         sameSite: 'none',
-        secure: true
+        secure: true,
+        path : '/'
     })
         res.status(401).json({ isAuthenticated: false, message: 'Unauthorized: Invalid token' });
     }
