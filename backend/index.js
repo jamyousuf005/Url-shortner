@@ -5,12 +5,12 @@ const urlRoute = require("./routes/url")
 const { connectToMongoDb } = require("./connection");
 const cors = require('cors');
 const cookieParser = require("cookie-parser");
-const { checkForAuthentication,restrictTo } = require('./middleware/auth')
+const { checkForAuthentication, restrictTo } = require('./middleware/auth')
 const app = express()
 const PORT = process.env.PORT;
 const URL = require("./models/url")
 const userRoute = require('./routes/user')
-const jwt=require('jsonwebtoken')
+const jwt = require('jsonwebtoken')
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
@@ -43,22 +43,24 @@ app.get('/checkAuth', async (req, res) => {
     try {
         const decoded = jwt.verify(token, process.env.SECRET);
         console.log('Token verified:', decoded);
-        res.status(200).json({ isAuthenticated: true, userId: decoded.userId ,role:decoded.role,email:decoded.email});
+        res.status(200).json({ isAuthenticated: true, userId: decoded.userId, role: decoded.role, email: decoded.email });
     } catch (error) {
         console.error('Token verification failed:', error.message);
         res.clearCookie('token', {
-        httpOnly: true,
-        sameSite: 'none',
-        secure: true,
-        path : '/'
-    })
+            httpOnly: true,
+            sameSite: 'none',
+            secure: true,
+            path: '/',
+            maxAge: 24 * 60 * 60 * 1000
+
+        })
         res.status(401).json({ isAuthenticated: false, message: 'Unauthorized: Invalid token' });
     }
 
 })
 
 
-app.delete("/delete",restrictTo(["ADMIN","NORMAL"]), async (req, res) => {
+app.delete("/delete", restrictTo(["ADMIN", "NORMAL"]), async (req, res) => {
     await URL.deleteMany({})
     res.json({ msg: "history deleted" })
 })
@@ -67,20 +69,20 @@ app.get("/", (req, res) => {
     return res.json({ msg: "nothing" })
 })
 
-app.get("/test", restrictTo(["NORMAL","ADMIN"]), async (req, res) => {
+app.get("/test", restrictTo(["NORMAL", "ADMIN"]), async (req, res) => {
     if (!req.user) return res.json([])
     const allUrls = await URL.find({ createdBy: req.user._id })
     return res.json(allUrls)
 })
 
 app.get("/admin/urls", restrictTo(["ADMIN"]), async (req, res) => {
-  try {
-    const allUrls = await URL.find({}).populate("createdBy", "email role");
-    return res.json({ urls: allUrls });
-  } catch (error) {
-    console.error("Error fetching all URLs:", error);
-    return res.status(500).json({ message: "Server error" });
-  }
+    try {
+        const allUrls = await URL.find({}).populate("createdBy", "email role");
+        return res.json({ urls: allUrls });
+    } catch (error) {
+        console.error("Error fetching all URLs:", error);
+        return res.status(500).json({ message: "Server error" });
+    }
 });
 
 app.get("/url/:shortId", async (req, res) => {

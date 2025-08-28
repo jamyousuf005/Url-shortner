@@ -54,10 +54,11 @@ async function hanldeUserLogin(req, res) {
             httpOnly: true,
             sameSite: 'none',
             secure: true,
-            path : '/'
+            path : '/',
+            maxAge: 24 * 60 * 60 * 1000
         })
 
-        return res.json({ msg: 'User logged in', token , role:user.role});
+        return res.json({ msg: 'User logged in', role:user.role});
     } catch (error) {
         console.error('Login Error:', error);
         return res.status(500).json({ msg: 'Internal Server Error' });
